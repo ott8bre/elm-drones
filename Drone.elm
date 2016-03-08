@@ -1,6 +1,7 @@
 module Drone
     ( Drone
     , newDrone
+    , items
     , take, drop, flyTo
     ) where
 
@@ -14,6 +15,7 @@ type alias Drone =
   { position: Point
   , products: Array Int
   , maxLoad: Int
+  , target: Maybe Point
   , status: Status
   }
 
@@ -22,8 +24,13 @@ newDrone l n a b =
   { position=Point a b
   , products=repeat n 0
   , maxLoad=l
+  , target=Nothing
   , status=Idle
   }
+
+items : Drone -> Int
+items d =
+  foldr (+) 0 d.products
 
 take : Int -> Int -> Drone -> Drone
 take t n d =

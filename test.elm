@@ -44,11 +44,18 @@ model =
 load : Point -> Int -> Int -> Drone -> List( Drone -> Drone )
 load p t n d =
   let
-    list = [take t n]
     x = round <| distance d.position p
     f = List.repeat x (flyTo p)
   in
-    list ++ f
+    f ++ [take t n]
+
+deliver : Point -> Int -> Int -> Drone -> List( Drone -> Drone )
+deliver p t n d =
+  let
+    x = round <| distance d.position p
+    f = List.repeat x (flyTo p)
+  in
+    f ++ [drop t n]
 
 initDrone = newDrone droneMaxLoad <| List.length weights
 
@@ -61,12 +68,18 @@ totalWeight a =
 update : Input -> Game -> Game
 update {space} ({state, turn, drone, queue} as game) =
   let
-    newState = if space then Play else Pause
-    newTurn = if state == Play then 1+turn else turn
-    cmd = if state == Play then List.head queue else Nothing
-    newQueue' = if state == Play && queue == [] then queue ++ load (Point 100 50) 1 5 drone else queue
-    newQueue = if state == Play then List.drop 1 newQueue' else newQueue'
+    state' = if space then Play else Pause
+    newTurn = if state' == Play then 1+turn else turn
+    newQueue' = if state' == Play && queue == [] then
+        if items drone == 0 then
+          queue ++ load (Point 20 5) 1 5 drone
+        else
+          queue ++ deliver (Point 5 20) 1 5 drone
+      else
+        queue
+    newQueue = if state' == Play then List.drop 1 newQueue' else newQueue'
 
+    cmd = if state' == Play then List.head newQueue' else Nothing
     newDrone =
       case cmd of
         Nothing -> drone
@@ -74,7 +87,7 @@ update {space} ({state, turn, drone, queue} as game) =
 
   in
     { game |
-      state = newState,
+      state = state',
       turn = newTurn,
       drone = newDrone,
       queue = newQueue
@@ -140,7 +153,7 @@ gameState =
 
 
 delta =
-  Signal.map inSeconds (fps 15)
+  Signal.map inSeconds (fps 10)
 
 input : Signal Input
 input =
