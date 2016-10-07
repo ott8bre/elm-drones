@@ -1,14 +1,15 @@
--- See this document for more information on making Pong:
--- http://elm-lang.org/blog/pong
+
 import Color exposing (..)
-import Graphics.Collage exposing (..)
-import Graphics.Element exposing (..)
+import Collage exposing (..)
+import Element exposing (..)
 import Keyboard
 import Text
 import Time exposing (..)
-import Window
-
-import Debug
+import Window exposing (Size)
+import AnimationFrame
+import Html exposing (..)
+import Html.App as App
+import Task
 
 
 -- MODEL
@@ -48,6 +49,7 @@ warehouse a b c =
 type alias Game =
   { state : State
   , turn : Int
+  , size : Size
   , weights: List Int
   , drones : List Drone
   , warehouses : List Warehouse
@@ -59,6 +61,7 @@ defaultGame : Game
 defaultGame =
   { state = Pause
   , turn = 0
+  , size = Size 0 0
   , weights = [10,20,30]
   , warehouses = [warehouse 100 0 [1,1,1], warehouse 0 100 [1,2,0]]
   , orders = [order 50 50 [1,0,1], order -40 10 [0,2,0]]
@@ -77,34 +80,52 @@ type alias Input =
 
 -- UPDATE
 
-update : Input -> Game -> Game
-update {space} ({state, turn, drones, warehouses} as game) =
-  let
-    newState =
-      if space then
-          Play
-      else
-          Pause
+type Msg
+  = Resize Size
+--  | Player1 Int
+--  | Player2 Int
+  | Tick Time
+  | TogglePlay
+  | NoOp
 
-    newTurn =
-      if state == Play then
-          1+turn
-      else
-          turn
+update : Msg -> Game -> Game
+update msg model =
+  case msg of
+    NoOp -> 
+      model
 
-    newDrones =
-      if state == Play then
-        List.map (moveDrone game) drones
-      else
-        drones
+    Resize size -> 
+      { model | size = size }
+    
+    TogglePlay ->
+      let
+        newState =
+          case model.state of
+            Play -> Pause
+            Pause -> Play
+      in 
+        { model | state = newState }
 
-  in
-    { game |
-        state = newState,
-        turn = newTurn,
-        drones = newDrones
-    }
+    Tick delta -> 
+      let
+        newTurn =
+          if model.state == Play then
+              1+model.turn
+          else
+              model.turn
 
+        newDrones =
+          if model.state == Play then
+            List.map (moveDrone model) model.drones
+          else
+            model.drones
+
+      in
+        { model |
+            turn = newTurn,
+            drones = newDrones
+        }
+        
 square : number -> number
 square a =
   a*a
@@ -169,25 +190,28 @@ moveTo a d =
 
 -- VIEW
 
-view : (Int,Int) -> Game -> Element
-view (w,h) game =
+view : Game -> Html Msg
+view model =
   let
+    {width, height} = 
+      model.size
     scores =
-      txt identity ("Turn " ++ toString game.turn)
+      txt identity ("Turn " ++ toString model.turn)
     wareShapes =
-      List.map (make 5 blue) game.warehouses
+      List.map (make 5 blue) model.warehouses
     orderShapes =
-      List.map (make 3 red) game.orders
+      List.map (make 3 red) model.orders
     dronesShapes =
-      List.map (make 3 white) game.drones
+      List.map (make 3 white) model.drones
   in
-    container w h middle <|
+    toHtml <|
+    container width height middle <|
     collage gameWidth gameHeight ( List.concat [
      [ rect gameWidth gameHeight
           |> filled pongGreen
       , toForm scores
           |> move (0, gameHeight/2 - 40)
-      , toForm (if game.state == Play then spacer 1 1 else txt identity msg)
+      , toForm (if model.state == Play then spacer 1 1 else txt identity msg)
           |> move (0, 40 - gameHeight/2)
       ], wareShapes, orderShapes, dronesShapes ])
 
@@ -210,14 +234,41 @@ txt f string =
     |> leftAligned
 
 
-msg = "SPACE to step"
+msg = "SPACE to start/pause"
 
 make r c obj =
   oval r r
     |> filled c
     |> move (obj.x, obj.y)
 
--- SIGNALS
+
+
+keyboardProcessor keyCode =
+  case keyCode of
+    32 -> TogglePlay
+    _ -> NoOp
+
+init =
+  (defaultGame, Task.perform (\_ -> NoOp) Resize (Window.size))
+
+main =
+  App.program
+    { init = init
+    , update = \msg m -> update msg m ! []
+    , view = view
+    , subscriptions =
+      (\_ -> Sub.batch
+        [ Window.resizes Resize
+        , Keyboard.downs keyboardProcessor
+        --, Keyboard.downs (keyboardProcessor True)
+        --, Keyboard.ups (keyboardProcessor False)
+        , AnimationFrame.diffs (Tick<<inSeconds)
+        ])
+    }
+
+{-
+
+-- SIGNALS (removed in 0.17)
 
 main =
   Signal.map2 view Window.dimensions gameState
@@ -239,3 +290,5 @@ input =
       (Signal.map .y Keyboard.wasd)
       (Signal.map .y Keyboard.arrows)
       delta
+
+-}
