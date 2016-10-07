@@ -12,14 +12,21 @@ import Html.App as App
 import Task
 
 
+--(gameWidth,gameHeight) = (600,400)
+(gameWidth,gameHeight) = (900,600)
+
+
+
 -- MODEL
 
-(gameWidth,gameHeight) = (600,400)
+type State 
+  = Play 
+  | Pause
 
-
-type State = Play | Pause
-
-type Status = Wait | Load Int Int Int | Deliver Int Int Int
+type Status 
+  = Wait 
+  | Load Int Int Int 
+  | Deliver Int Int Int
 
 type alias Object a =
   { a | x : Float, y : Float, p: List Int }
@@ -63,10 +70,17 @@ defaultGame =
   , turn = 0
   , size = Size 0 0
   , weights = [10,20,30]
-  , warehouses = [warehouse 100 0 [1,1,1], warehouse 0 100 [1,2,0]]
-  , orders = [order 50 50 [1,0,1], order -40 10 [0,2,0]]
-  , drones = [drone 100 0
-    --, drone 0 100
+  , warehouses = 
+    [ warehouse 100 0 [1,1,1]
+    , warehouse 0 100 [1,2,0]
+    ]
+  , orders = 
+    [ order 50 50 [1,0,1]
+    , order -40 10 [0,2,0]
+    ]
+  , drones = 
+    [ drone 100 0
+    , drone 0 100
     ]
   }
 
@@ -196,45 +210,67 @@ view model =
     {width, height} = 
       model.size
     scores =
-      txt identity ("Turn " ++ toString model.turn)
+      case model.state of
+        Pause ->
+          txt identity ("Turn " ++ toString model.turn)
+        _ ->
+          spacer 1 1
+    info =   
+      case model.state of
+        Pause ->
+          txt identity msg
+        _ ->
+          spacer 1 1
     wareShapes =
-      List.map (make 5 blue) model.warehouses
+      List.map (make 5 wareColor) model.warehouses
     orderShapes =
-      List.map (make 3 red) model.orders
+      List.map (make 5 orderColor) model.orders
     dronesShapes =
-      List.map (make 3 white) model.drones
+      List.map (make 3 droneColor) model.drones
   in
     toHtml <|
     container width height middle <|
-    collage gameWidth gameHeight ( List.concat [
-     [ rect gameWidth gameHeight
-          |> filled pongGreen
-      , toForm scores
+    collage gameWidth gameHeight ( List.concat
+      [
+        [ rect gameWidth gameHeight
+          |> filled backgroundColor
+        , toForm scores
           |> move (0, gameHeight/2 - 40)
-      , toForm (if model.state == Play then spacer 1 1 else txt identity msg)
+        , toForm info
           |> move (0, 40 - gameHeight/2)
-      ], wareShapes, orderShapes, dronesShapes ])
+        ]
+      , wareShapes
+      , orderShapes
+      , dronesShapes 
+      ]
+    )
 
 
-pongGreen =
-  rgb 60 60 60
+backgroundColor =
+  rgb 10 10 10
 
-pongRed =
-  rgb 100 60 60
+wareColor =
+  blue
 
-textGreen =
+orderColor =
+  red
+
+droneColor =
+  white
+
+textColor =
   rgb 160 200 160
 
 
 txt f string =
   Text.fromString string
-    |> Text.color textGreen
+    |> Text.color textColor
     |> Text.monospace
     |> f
     |> leftAligned
 
 
-msg = "SPACE to start/pause"
+msg = "press SPACE to start/pause"
 
 make r c obj =
   oval r r
@@ -259,36 +295,9 @@ main =
     , subscriptions =
       (\_ -> Sub.batch
         [ Window.resizes Resize
-        , Keyboard.downs keyboardProcessor
+        , Keyboard.ups keyboardProcessor
         --, Keyboard.downs (keyboardProcessor True)
         --, Keyboard.ups (keyboardProcessor False)
         , AnimationFrame.diffs (Tick<<inSeconds)
         ])
     }
-
-{-
-
--- SIGNALS (removed in 0.17)
-
-main =
-  Signal.map2 view Window.dimensions gameState
-
-
-gameState : Signal Game
-gameState =
-  Signal.foldp update defaultGame input
-
-
-delta =
-  Signal.map inSeconds (fps 35)
-
-input : Signal Input
-input =
-  Signal.sampleOn delta <|
-    Signal.map4 Input
-      Keyboard.space
-      (Signal.map .y Keyboard.wasd)
-      (Signal.map .y Keyboard.arrows)
-      delta
-
--}

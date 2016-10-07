@@ -1,8 +1,8 @@
-module Point
+module Point exposing
     ( Point
     , origin
     , distance
-    ) where
+    ) 
 
 type alias Point =
   { x: Float

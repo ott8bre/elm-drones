@@ -1,9 +1,9 @@
-module Drone
+module Drone exposing
     ( Drone
     , newDrone
     , items
     , take, drop, flyTo
-    ) where
+    )
 
 import Array exposing (..)
 
