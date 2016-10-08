@@ -15,8 +15,8 @@ import Array exposing (..)
 import Point exposing (..)
 import Drone exposing (..)
 
---(gameWidth,gameHeight) = (600,400)
-(gameWidth,gameHeight) = (900,600)
+(gameWidth,gameHeight) = (600,400)
+--(gameWidth,gameHeight) = (900,600)
 
 
 --SCENARIO
@@ -84,6 +84,15 @@ type Msg
   | TogglePlay
   | NoOp
 
+{- EXPERIMENTAL -}
+targets : List Point
+targets = 
+  [ Point 0 (gameHeight/4)
+  , Point (gameWidth/4) 0
+  , Point 0 -(gameHeight/4)
+  , Point -(gameWidth/4) 0
+  ]
+
 update : Msg -> Game -> Game
 update msg model =
   case msg of
@@ -103,51 +112,50 @@ update msg model =
         { model | state = newState }
 
     Tick delta -> 
-      let
-        newTurn =
-          if model.state == Play then
+      case model.state of
+        Play ->
+          let
+            newTurn =
               1+model.turn
-          else
-              model.turn
 
-        newQueue' =
-          case (model.state, model.queue) of
-            (Play,[]) ->
-              if items model.drone == 0 then
-                model.queue ++ load (Point 20 5) 1 5 model.drone
-              else
-                model.queue ++ deliver (Point 5 20) 1 5 model.drone
-            
-            _ ->
-              model.queue
+            newQueue' =
+              case model.queue of
+                [] ->
+                  let
+                    rand = model.turn % List.length targets 
+                    point = targets 
+                      |> List.drop rand 
+                      |> List.head
+                      |> Maybe.withDefault Point.origin
+                    action = case items model.drone of
+                      0 -> load                        
+                      _ -> deliver
+                  in
+                      model.queue ++ action point 1 5 model.drone
 
-        newQueue = 
-          case model.state of
-            Play ->
+                _ ->
+                  model.queue
+
+            newQueue = 
               List.drop 1 newQueue' 
-            
-            _ -> 
-              newQueue'
 
-        cmd = 
-          case model.state of
-            Play ->
-              List.head newQueue' 
-            
-            _ -> 
-              Nothing
-        
-        newDrone =
-          case cmd of
-            Nothing -> model.drone
-            Just z -> Debug.log "next" (z model.drone)
+            newDrone =
+              case List.head newQueue' of
+                Nothing -> 
+                  model.drone
+                
+                Just z -> 
+                  Debug.log "next" (z model.drone)
 
-      in
-        { model |
-          turn = newTurn,
-          drone = newDrone,
-          queue = newQueue
-        }
+          in
+            { model
+            | turn = newTurn
+            , drone = newDrone
+            , queue = newQueue
+            }
+
+        _ ->
+          model
 
 -- VIEW
 
