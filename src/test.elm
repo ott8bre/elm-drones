@@ -10,14 +10,12 @@ import AnimationFrame
 import Html exposing (..)
 import Html.App as App
 import Task
-import Array exposing (..)
+--import Array exposing (..)
 
+import Env exposing (..)
 import Point exposing (..)
 import Drone exposing (..)
-
-(gameWidth,gameHeight) = (600,400)
---(gameWidth,gameHeight) = (900,600)
-
+import Packet exposing (..)
 
 --SCENARIO
 
@@ -34,13 +32,7 @@ type alias Game =
   { state : State
   , turn : Int
   , size : Size
-  , drone : Drone
-  , queue : List (Drone -> Drone)
-  }
-
-type alias Input =
-  { space : Bool
-  , delta : Time
+  , drones : List Drone.Model --TODO HIDE THIS!
   }
 
 model : Game
@@ -48,10 +40,10 @@ model =
   { state = Pause
   , turn = 0
   , size = Size 0 0
-  , drone = initDrone 0 0
-  , queue = []
+  , drones = List.map initDrone [ Point -202 0, Point 0 153, Point -50 -100, Point 0 0 ] 
   }
 
+{-
 load : Point -> Int -> Int -> Drone -> List( Drone -> Drone )
 load p t n d =
   let
@@ -67,32 +59,20 @@ deliver p t n d =
     f = List.repeat x (flyTo p)
   in
     f ++ [drop t n]
+-}
 
-initDrone : Float -> Float -> Drone
-initDrone = Drone.new droneMaxLoad <| List.length weights
-
-totalWeight : Drone -> Int
-totalWeight a =
-  List.foldr (+) 0 <| List.map2 (*) weights <| toList a.products
+initDrone : Point -> Drone.Model
+initDrone = 
+  Drone.init droneMaxLoad -- <| List.length weights
 
 --UPDATE
 
 type Msg
   = Resize Size
---  | Player1 Int
---  | Player2 Int
   | Tick Time
   | TogglePlay
   | NoOp
 
-{- EXPERIMENTAL -}
-targets : List Point
-targets = 
-  [ Point 0 (gameHeight/4)
-  , Point (gameWidth/4) 0
-  , Point 0 -(gameHeight/4)
-  , Point -(gameWidth/4) 0
-  ]
 
 update : Msg -> Game -> Game
 update msg model =
@@ -119,40 +99,21 @@ update msg model =
             newTurn =
               1+model.turn
 
-            newQueue' =
-              case model.queue of
-                [] ->
-                  let
-                    rand = model.turn % List.length targets 
-                    point = targets 
-                      |> List.drop rand 
-                      |> List.head
-                      |> Maybe.withDefault Point.origin
-                    action = case items model.drone of
-                      0 -> load                        
-                      _ -> deliver
-                  in
-                      model.queue ++ action point 1 5 model.drone
-
-                _ ->
-                  model.queue
-
-            newQueue = 
-              List.drop 1 newQueue' 
-
-            newDrone =
-              case List.head newQueue' of
-                Nothing -> 
-                  model.drone
-                
-                Just z -> 
-                  Debug.log "next" (z model.drone)
-
+            newDrones = 
+              List.map (\drone ->
+                if Drone.isEmpty drone then 
+                    let
+                      packets = orders
+                        |> List.map (.address >> Packet.init 1 3)
+                    in
+                      List.foldr Drone.load drone packets --WOW !!!
+                else 
+                  Drone.update drone
+              ) model.drones
           in
             { model
             | turn = newTurn
-            , drone = newDrone
-            , queue = newQueue
+            , drones = newDrones
             }
 
         _ ->
@@ -187,8 +148,9 @@ view model =
           |> move (0, gameHeight/2 - 40)
       , toForm info
           |> move (0, 40 - gameHeight/2)
-      , make 5 white model.drone.position
-      ]
+      ] 
+      ++ List.map (.address >> make 5 Color.red) orders
+      ++ List.map Drone.view model.drones
     )
 
 backgroundColor =
@@ -222,7 +184,7 @@ make r c obj =
     |> filled c
     |> move (obj.x, obj.y)
 
-
+-- MAIN --
 
 keyboardProcessor keyCode =
   case keyCode of

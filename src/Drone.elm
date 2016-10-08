@@ -1,32 +1,100 @@
 module Drone exposing
-    ( Drone
-    , new
-    , items
-    , take, drop, flyTo
+    ( Model
+    , init , update
+    , load
+    , view , weight , isEmpty
     )
 
-import Array exposing (..)
+import Color
+import Collage exposing (..)
 
-import Point exposing (..)
+import Point exposing (Point)
+import Packet exposing (Packet)
 
-type Status = Idle | Load Int Int Int | Deliver Int Int Int
+type Status 
+  = Idle 
+  | Load Int Int Int 
+  | Deliver Int Int Int
 
-type alias Drone =
-  { position: Point
-  , products: Array Int
+type alias Model =
+  { schedule: List Packet
+  , position: Point
   , maxLoad: Int
-  , target: Maybe Point
   , status: Status
   }
 
-new : Int -> Int -> Float -> Float -> Drone
-new l n a b =
-  { position=Point a b
-  , products=repeat n 0
-  , maxLoad=l
-  , target=Nothing
-  , status=Idle
+init : Int -> Point -> Model
+init load point =
+  { schedule = []
+  , position = point
+  , maxLoad = load
+  , status = Idle
   }
+
+
+load : Packet -> Model -> Model
+load packet model =
+  { model | schedule = List.append model.schedule [packet] }
+  
+
+distance : Point -> Point -> Int
+distance p q =
+    Point.distance p q |> floor
+
+
+stepTo : Point -> Point -> Point
+stepTo src dest =
+  let
+    d = distance src dest
+    p = if d == 0 then 1 else 1 / toFloat d
+  in
+    { src
+    | x = (1-p) * src.x + p * dest.x
+    , y = (1-p) * src.y + p * dest.y
+    }
+
+update : Model -> Model
+update model =
+--  case model.status of 
+--    _ ->
+      let
+        newSchedule = 
+          if model.position == newPos then
+            List.tail model.schedule
+            |> Maybe.withDefault []
+          else
+            model.schedule 
+     
+        newPos = 
+          List.head model.schedule 
+          |> Maybe.map .address
+          |> Maybe.withDefault model.position
+          |> stepTo model.position 
+        
+      in
+        { model 
+        | position = newPos
+        , schedule = newSchedule 
+        }
+
+
+view : Model -> Form
+view {position} = 
+  oval 5 5
+    |> filled Color.white
+    |> move (position.x, position.y)
+
+isEmpty : Model -> Bool
+isEmpty model =
+  List.isEmpty model.schedule
+
+weight : Model -> Int
+weight model =
+  model.schedule
+  |> List.map .weight
+  |> List.foldr (+) 0
+
+{-
 
 items : Drone -> Int
 items d =
@@ -74,3 +142,5 @@ move1 src dest =
 flyTo : Point -> Drone -> Drone
 flyTo dest drone =
   { drone | position = move1 drone.position dest}
+
+-}
