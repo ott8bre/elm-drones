@@ -1,6 +1,6 @@
 module Drone exposing
     ( Drone
-    , newDrone
+    , new
     , items
     , take, drop, flyTo
     )
@@ -19,8 +19,8 @@ type alias Drone =
   , status: Status
   }
 
-newDrone : Int -> Int -> Float -> Float -> Drone
-newDrone l n a b =
+new : Int -> Int -> Float -> Float -> Drone
+new l n a b =
   { position=Point a b
   , products=repeat n 0
   , maxLoad=l

@@ -68,7 +68,8 @@ deliver p t n d =
   in
     f ++ [drop t n]
 
-initDrone = newDrone droneMaxLoad <| List.length weights
+initDrone : Float -> Float -> Drone
+initDrone = Drone.new droneMaxLoad <| List.length weights
 
 totalWeight : Drone -> Int
 totalWeight a =
