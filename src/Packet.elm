@@ -1,11 +1,10 @@
-module Packet exposing (..)
+module Packet exposing (Packet, init, weight)
 
 import Point exposing (..)
 import Env exposing (..)
 
 type alias Packet =
   { address : Point
-  , weight : Int
   , content : 
     { item : ItemId 
     , copies : Int 
@@ -19,5 +18,8 @@ init item copies point =
     { item = item
     , copies = copies
     }
-  , weight = copies * Env.weightOf item
   }
+
+weight : Packet -> Int
+weight {content} = 
+  content.copies * Env.weightOf content.item

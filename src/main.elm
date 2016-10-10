@@ -10,12 +10,17 @@ import AnimationFrame
 import Html exposing (..)
 import Html.App as App
 import Task
+--import Array exposing (..)
 
+import Env exposing (..)
+import Point exposing (..)
+import Drone exposing (..)
+import Packet exposing (..)
 
---(gameWidth,gameHeight) = (600,400)
-(gameWidth,gameHeight) = (900,600)
+--SCENARIO
 
-
+weights = [4,2,7,3,1]
+droneMaxLoad = 12
 
 -- MODEL
 
@@ -23,84 +28,51 @@ type State
   = Play 
   | Pause
 
-type Status 
-  = Wait 
-  | Load Int Int Int 
-  | Deliver Int Int Int
-
-type alias Object a =
-  { a | x : Float, y : Float, p: List Int }
-
-type alias Order =
-  Object {d: List Int}
-
-type alias Warehouse =
-  Object {}
-
-type alias Drone =
-  Object {status: Status}
-
-drone : Float -> Float -> Drone
-drone a b =
-  {x=a, y=b, p=[], status=Wait}
-
-order : Float -> Float -> List Int -> Order
-order a b c =
-  {x=a, y=b, p=c, d=[]}
-
-warehouse : Float -> Float -> List Int -> Warehouse
-warehouse a b c =
-  {x=a, y=b, p=c}
-
-
 type alias Game =
   { state : State
   , turn : Int
   , size : Size
-  , weights: List Int
-  , drones : List Drone
-  , warehouses : List Warehouse
-  , orders : List Order
+  , drones : List Drone.Model --TODO HIDE THIS!
   }
 
-
-defaultGame : Game
-defaultGame =
+model : Game
+model =
   { state = Pause
   , turn = 0
   , size = Size 0 0
-  , weights = [10,20,30]
-  , warehouses = 
-    [ warehouse 100 0 [1,1,1]
-    , warehouse 0 100 [1,2,0]
-    ]
-  , orders = 
-    [ order 50 50 [1,0,1]
-    , order -40 10 [0,2,0]
-    ]
-  , drones = 
-    [ drone 100 0
-    , drone 0 100
-    ]
+  , drones = List.map initDrone [ Point -202 0, Point 0 153, Point -50 -100, Point 0 0 ] 
   }
 
-type alias Input =
-  { space : Bool
-  , dir1 : Int
-  , dir2 : Int
-  , delta : Time
-  }
+{-
+load : Point -> Int -> Int -> Drone -> List( Drone -> Drone )
+load p t n d =
+  let
+    x = round <| distance d.position p
+    f = List.repeat x (flyTo p)
+  in
+    f ++ [take t n]
 
+deliver : Point -> Int -> Int -> Drone -> List( Drone -> Drone )
+deliver p t n d =
+  let
+    x = round <| distance d.position p
+    f = List.repeat x (flyTo p)
+  in
+    f ++ [drop t n]
+-}
 
--- UPDATE
+initDrone : Point -> Drone.Model
+initDrone = 
+  Drone.init droneMaxLoad -- <| List.length weights
+
+--UPDATE
 
 type Msg
   = Resize Size
---  | Player1 Int
---  | Player2 Int
   | Tick Time
   | TogglePlay
   | NoOp
+
 
 update : Msg -> Game -> Game
 update msg model =
@@ -121,86 +93,31 @@ update msg model =
         { model | state = newState }
 
     Tick delta -> 
-      let
-        newTurn =
-          if model.state == Play then
+      case model.state of
+        Play ->
+          let
+            newTurn =
               1+model.turn
-          else
-              model.turn
 
-        newDrones =
-          if model.state == Play then
-            List.map (moveDrone model) model.drones
-          else
-            model.drones
+            newDrones = 
+              List.map (\drone ->
+                if Drone.isEmpty drone then 
+                    let
+                      packets = orders
+                        |> List.map (.address >> Packet.init 1 3)
+                    in
+                      List.foldr Drone.load drone packets --WOW !!!
+                else 
+                  Drone.update drone
+              ) model.drones
+          in
+            { model
+            | turn = newTurn
+            , drones = newDrones
+            }
 
-      in
-        { model |
-            turn = newTurn,
-            drones = newDrones
-        }
-        
-square : number -> number
-square a =
-  a*a
-
-distance : Object k -> Object h -> Int
-distance a b =
-  let
-    sum =  ( square(a.x-b.x) + square(a.y-b.y) )
-  in
-    sum |> sqrt |> ceiling
-
-nextP : Game -> Status
-nextP g =
-  let
-    list = g.orders
-    sum = List.map(\x->List.sum x.p) list
-    d = List.foldr (\x y -> y + if x==0 then 1 else 0) 0 sum
-    rest = List.drop d list
-    o = List.head rest
-    --o.p=[]
-  in
-    case o of
-      Nothing ->
-        Wait
-      Just z ->
-        Load d 1 1
-
-
-moveDrone : Game -> Drone -> Drone
-moveDrone g d =
-  let
-    w = List.head g.warehouses
-    o = List.head g.orders
-  in
-  case d.status of
-    Wait ->
-      {d | status = nextP g}
-    Load id t n ->
-      case w of
-        Nothing -> d
-        Just z -> moveTo z d
-    Deliver id t n ->
-      case o of
-        Nothing -> d
-        Just z -> moveTo z d
-
-moveTo : Object z -> Drone -> Drone
-moveTo a d =
-  let
-    dist = Debug.log "dist" (distance a d)
-    p = 1 / toFloat dist
-
-  in
-    if dist == 0 then
-      if d.status == Load 0 1 1 then
-        {d | status = Deliver 0 1 1}
-      else
-        {d | status = Wait}
-    else
-      {d | x = p * a.x + (1-p) * d.x, y = p * a.y + (1-p) * d.y}
-
+        _ ->
+          model
 
 -- VIEW
 
@@ -221,30 +138,20 @@ view model =
           txt identity msg
         _ ->
           spacer 1 1
-    wareShapes =
-      List.map (make 5 wareColor) model.warehouses
-    orderShapes =
-      List.map (make 5 orderColor) model.orders
-    dronesShapes =
-      List.map (make 3 droneColor) model.drones
   in
     toHtml <|
     container width height middle <|
-    collage gameWidth gameHeight ( List.concat
-      [
-        [ rect gameWidth gameHeight
+    collage gameWidth gameHeight (
+      [ rect gameWidth gameHeight
           |> filled backgroundColor
-        , toForm scores
+      , toForm scores
           |> move (0, gameHeight/2 - 40)
-        , toForm info
+      , toForm info
           |> move (0, 40 - gameHeight/2)
-        ]
-      , wareShapes
-      , orderShapes
-      , dronesShapes 
-      ]
+      ] 
+      ++ List.map (.address >> make 5 Color.red) orders
+      ++ List.map Drone.view model.drones
     )
-
 
 backgroundColor =
   rgb 10 10 10
@@ -277,7 +184,7 @@ make r c obj =
     |> filled c
     |> move (obj.x, obj.y)
 
-
+-- MAIN --
 
 keyboardProcessor keyCode =
   case keyCode of
@@ -285,7 +192,7 @@ keyboardProcessor keyCode =
     _ -> NoOp
 
 init =
-  (defaultGame, Task.perform (\_ -> NoOp) Resize (Window.size))
+  (model, Task.perform (\_ -> NoOp) Resize (Window.size))
 
 main =
   App.program
