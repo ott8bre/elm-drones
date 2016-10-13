@@ -1,5 +1,5 @@
 module Drone exposing
-    ( Model
+    ( Drone
     , init , update
     , load
     , view , weight , isEmpty
@@ -9,21 +9,26 @@ import Color
 import Collage exposing (..)
 
 import Point exposing (Point)
-import Packet exposing (Packet)
+import Env exposing (Packet, packetWeight)
+
+type Msg 
+  = Wait
+  | Load Packet Point
+  | Unload Packet Point
 
 type Status 
-  = Idle 
-  | Load Int Int Int 
-  | Deliver Int Int Int
+  = Idle      -- 
+  | Loading   -- means fly to & load
+  | Unloading -- means fly to & unload
 
-type alias Model =
+type alias Drone =
   { schedule: List Packet
   , position: Point
   , maxLoad: Int
   , status: Status
   }
 
-init : Int -> Point -> Model
+init : Int -> Point -> Drone
 init load point =
   { schedule = []
   , position = point
@@ -32,7 +37,7 @@ init load point =
   }
 
 
-load : Packet -> Model -> Model
+load : Packet -> Drone -> Drone
 load packet model =
   { model | schedule = List.append model.schedule [packet] }
   
@@ -53,7 +58,7 @@ stepTo src dest =
     , y = (1-p) * src.y + p * dest.y
     }
 
-update : Model -> Model
+update : Drone -> Drone
 update model =
 --  case model.status of 
 --    _ ->
@@ -78,20 +83,20 @@ update model =
         }
 
 
-view : Model -> Form
+view : Drone -> Form
 view {position} = 
   oval 5 5
     |> filled Color.white
     |> move (position.x, position.y)
 
-isEmpty : Model -> Bool
+isEmpty : Drone -> Bool
 isEmpty model =
   List.isEmpty model.schedule
 
-weight : Model -> Int
+weight : Drone -> Int
 weight model =
   model.schedule
-  |> List.map .weight
+  |> List.map packetWeight
   |> List.foldr (+) 0
 
 {-

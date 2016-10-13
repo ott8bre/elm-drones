@@ -10,17 +10,11 @@ import AnimationFrame
 import Html exposing (..)
 import Html.App as App
 import Task
---import Array exposing (..)
+import Array exposing (..)
 
 import Env exposing (..)
 import Point exposing (..)
-import Drone exposing (..)
-import Packet exposing (..)
-
---SCENARIO
-
-weights = [4,2,7,3,1]
-droneMaxLoad = 12
+import Drone exposing (Drone)
 
 -- MODEL
 
@@ -32,7 +26,8 @@ type alias Game =
   { state : State
   , turn : Int
   , size : Size
-  , drones : List Drone.Model --TODO HIDE THIS!
+  , drones : List Drone
+  , packets : List Packet
   }
 
 model : Game
@@ -40,7 +35,13 @@ model =
   { state = Pause
   , turn = 0
   , size = Size 0 0
-  , drones = List.map initDrone [ Point -202 0, Point 0 153, Point -50 -100, Point 0 0 ] 
+  , drones = List.map initDrone 
+    [ Point -202 0
+    --, Point 0 153
+    --, Point -50 -100
+    --, Point 0 0 
+    ] 
+  , packets = List.map orderToPackets orders |> List.concat
   }
 
 {-
@@ -61,9 +62,9 @@ deliver p t n d =
     f ++ [drop t n]
 -}
 
-initDrone : Point -> Drone.Model
+initDrone : Point -> Drone
 initDrone = 
-  Drone.init droneMaxLoad -- <| List.length weights
+  Drone.init Env.droneMaxLoad
 
 --UPDATE
 
@@ -96,28 +97,44 @@ update msg model =
       case model.state of
         Play ->
           let
+            xxx = Debug.log "packets" <| List.length model.packets
+            terminated = List.isEmpty model.packets && List.all Drone.isEmpty model.drones
+            newState =
+              case terminated of
+                True -> Pause
+                _ -> model.state
+
             newTurn =
               1+model.turn
 
-            newDrones = 
-              List.map (\drone ->
-                if Drone.isEmpty drone then 
-                    let
-                      packets = orders
-                        |> List.map (.address >> Packet.init 1 3)
-                    in
-                      List.foldr Drone.load drone packets --WOW !!!
-                else 
-                  Drone.update drone
-              ) model.drones
+            (newPackets, newDrones) = 
+              updatePacketsDrones model.packets model.drones
+              
           in
             { model
-            | turn = newTurn
+            | state = newState
+            , turn = newTurn
             , drones = newDrones
+            , packets = newPackets
             }
 
         _ ->
           model
+
+
+
+updatePacketsDrones : List Packet -> List Drone -> (List Packet , List Drone)
+updatePacketsDrones packets drones =
+  let 
+    func drone (ps, ds) =
+      case (ps, Drone.isEmpty drone) of
+        (x::rest, True) ->
+          (rest, Drone.load x drone :: ds)
+
+        _ ->
+          (ps, Drone.update drone :: ds)
+  in
+    List.foldr func (packets, []) drones
 
 -- VIEW
 
@@ -149,9 +166,26 @@ view model =
       , toForm info
           |> move (0, 40 - gameHeight/2)
       ] 
+      ++ List.map (.address >> make 5 Color.blue) warehouses
       ++ List.map (.address >> make 5 Color.red) orders
       ++ List.map Drone.view model.drones
+      -- ++ [ test (gameWidth/2) (gameHeight/2) ]
+      ++ List.indexedMap (drawOrder (gameWidth/2) (gameHeight/2) ) model.packets
     )
+
+test x y =
+  rect 3 3
+    |> filled Color.brown
+    |> move (x-3, y-3)
+
+drawOrder : Float -> Float -> Int -> Packet -> Form
+drawOrder x y i order =
+  let
+    k = 1 + i
+  in
+    rect 4 4
+      |> filled Color.brown
+      |> move (x - 5*k, y - 5)
 
 backgroundColor =
   rgb 10 10 10

@@ -135,9 +135,9 @@ update msg model =
             model.drones
 
       in
-        { model |
-            turn = newTurn,
-            drones = newDrones
+        { model 
+        | turn = newTurn
+        , drones = newDrones
         }
         
 square : number -> number
