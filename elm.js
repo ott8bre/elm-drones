@@ -11310,10 +11310,40 @@ var _ott8bre$elm_drones$Env$orders = _elm_lang$core$Native_List.fromArray(
 				[0, 1, 1, 0, 1]))
 	},
 		{
+		address: A2(_ott8bre$elm_drones$Point$Point, 250, 50),
+		items: _elm_lang$core$Array$fromList(
+			_elm_lang$core$Native_List.fromArray(
+				[2, 0, 0, 0, 1]))
+	},
+		{
 		address: A2(_ott8bre$elm_drones$Point$Point, -150, -150),
 		items: _elm_lang$core$Array$fromList(
 			_elm_lang$core$Native_List.fromArray(
 				[0, 1, 1, 0, 1]))
+	},
+		{
+		address: A2(_ott8bre$elm_drones$Point$Point, 50, 50),
+		items: _elm_lang$core$Array$fromList(
+			_elm_lang$core$Native_List.fromArray(
+				[2, 0, 0, 0, 1]))
+	},
+		{
+		address: A2(_ott8bre$elm_drones$Point$Point, -250, 190),
+		items: _elm_lang$core$Array$fromList(
+			_elm_lang$core$Native_List.fromArray(
+				[2, 0, 0, 0, 1]))
+	},
+		{
+		address: A2(_ott8bre$elm_drones$Point$Point, -50, -50),
+		items: _elm_lang$core$Array$fromList(
+			_elm_lang$core$Native_List.fromArray(
+				[2, 0, 0, 0, 1]))
+	},
+		{
+		address: A2(_ott8bre$elm_drones$Point$Point, -250, -190),
+		items: _elm_lang$core$Array$fromList(
+			_elm_lang$core$Native_List.fromArray(
+				[2, 0, 0, 0, 1]))
 	}
 	]);
 var _ott8bre$elm_drones$Env$weights = _elm_lang$core$Array$fromList(
@@ -11451,7 +11481,6 @@ var _ott8bre$elm_drones$Main$make = F3(
 				c,
 				A2(_evancz$elm_graphics$Collage$oval, r, r)));
 	});
-var _ott8bre$elm_drones$Main$msg = 'press SPACE to start/pause';
 var _ott8bre$elm_drones$Main$textColor = A3(_elm_lang$core$Color$rgb, 160, 200, 160);
 var _ott8bre$elm_drones$Main$txt = F2(
 	function (f, string) {
@@ -11491,15 +11520,17 @@ var _ott8bre$elm_drones$Main$test = F2(
 var _ott8bre$elm_drones$Main$view = function (model) {
 	var info = function () {
 		var _p0 = model.state;
-		if (_p0.ctor === 'Pause') {
-			return A2(_ott8bre$elm_drones$Main$txt, _elm_lang$core$Basics$identity, _ott8bre$elm_drones$Main$msg);
-		} else {
+		if (_p0.ctor === 'Play') {
 			return A2(_evancz$elm_graphics$Element$spacer, 1, 1);
+		} else {
+			return A2(_ott8bre$elm_drones$Main$txt, _elm_lang$core$Basics$identity, 'press SPACE to start/pause');
 		}
 	}();
 	var scores = function () {
 		var _p1 = model.state;
-		if (_p1.ctor === 'Pause') {
+		if (_p1.ctor === 'Play') {
+			return A2(_evancz$elm_graphics$Element$spacer, 1, 1);
+		} else {
 			return A2(
 				_ott8bre$elm_drones$Main$txt,
 				_elm_lang$core$Basics$identity,
@@ -11507,8 +11538,6 @@ var _ott8bre$elm_drones$Main$view = function (model) {
 					_elm_lang$core$Basics_ops['++'],
 					'Turn ',
 					_elm_lang$core$Basics$toString(model.turn)));
-		} else {
-			return A2(_evancz$elm_graphics$Element$spacer, 1, 1);
 		}
 	}();
 	var _p2 = model.size;
@@ -11625,8 +11654,9 @@ var _ott8bre$elm_drones$Main$Game = F5(
 	function (a, b, c, d, e) {
 		return {state: a, turn: b, size: c, drones: d, packets: e};
 	});
+var _ott8bre$elm_drones$Main$End = {ctor: 'End'};
 var _ott8bre$elm_drones$Main$Pause = {ctor: 'Pause'};
-var _ott8bre$elm_drones$Main$model = {
+var _ott8bre$elm_drones$Main$initialModel = {
 	state: _ott8bre$elm_drones$Main$Pause,
 	turn: 0,
 	size: A2(_elm_lang$window$Window$Size, 0, 0),
@@ -11635,7 +11665,10 @@ var _ott8bre$elm_drones$Main$model = {
 		_ott8bre$elm_drones$Main$initDrone,
 		_elm_lang$core$Native_List.fromArray(
 			[
-				A2(_ott8bre$elm_drones$Point$Point, -202, 0)
+				A2(_ott8bre$elm_drones$Point$Point, -202, 0),
+				A2(_ott8bre$elm_drones$Point$Point, 0, 153),
+				A2(_ott8bre$elm_drones$Point$Point, -50, -100),
+				A2(_ott8bre$elm_drones$Point$Point, 0, 0)
 			])),
 	packets: _elm_lang$core$List$concat(
 		A2(_elm_lang$core$List$map, _ott8bre$elm_drones$Env$orderToPackets, _ott8bre$elm_drones$Env$orders))
@@ -11660,7 +11693,9 @@ var _ott8bre$elm_drones$Main$update = F2(
 						return _ott8bre$elm_drones$Main$Play;
 					}
 				}();
-				return _elm_lang$core$Native_Utils.update(
+				return _elm_lang$core$Native_Utils.eq(model.state, _ott8bre$elm_drones$Main$End) ? _elm_lang$core$Native_Utils.update(
+					_ott8bre$elm_drones$Main$initialModel,
+					{size: model.size}) : _elm_lang$core$Native_Utils.update(
 					model,
 					{state: newState});
 			default:
@@ -11674,7 +11709,7 @@ var _ott8bre$elm_drones$Main$update = F2(
 					var newState = function () {
 						var _p14 = terminated;
 						if (_p14 === true) {
-							return _ott8bre$elm_drones$Main$Pause;
+							return _ott8bre$elm_drones$Main$End;
 						} else {
 							return model.state;
 						}
@@ -11709,7 +11744,7 @@ var _ott8bre$elm_drones$Main$Resize = function (a) {
 };
 var _ott8bre$elm_drones$Main$init = {
 	ctor: '_Tuple2',
-	_0: _ott8bre$elm_drones$Main$model,
+	_0: _ott8bre$elm_drones$Main$initialModel,
 	_1: A3(
 		_elm_lang$core$Task$perform,
 		function (_p16) {
