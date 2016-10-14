@@ -29,6 +29,7 @@ type alias Game =
   , size : Size
   , drones : List Drone
   , packets : List Packet
+  , products : List Int
   }
 
 initialModel : Game
@@ -43,6 +44,7 @@ initialModel =
     , Point 0 0 
     ] 
   , packets = List.map orderToPackets orders |> List.concat
+  , products = List.map waresToProducts warehouses
   }
 
 {-
@@ -171,23 +173,34 @@ view model =
       ++ List.map (.address >> make 5 Color.blue) warehouses
       ++ List.map (.address >> make 5 Color.red) orders
       ++ List.map Drone.view model.drones
-      -- ++ [ test (gameWidth/2) (gameHeight/2) ]
-      ++ List.indexedMap (drawOrder (gameWidth/2) (gameHeight/2) ) model.packets
+      ++ (List.indexedMap (drawProducts (-gameWidth/2) (-gameHeight/2) ) model.products |> List.concat)
+      ++ List.indexedMap (drawPackets (gameWidth/2) (gameHeight/2) ) model.packets
     )
 
-test x y =
-  rect 3 3
-    |> filled Color.brown
-    |> move (x-3, y-3)
+drawProducts : Float -> Float -> Int -> Int -> List Form
+drawProducts x y i size =
+  let
+    f = \h -> square Color.green (x + 5*h, y + 5*k)
+    range = [1..size]
+    k = 1 + i
+  in
+    List.map f range
+  
 
-drawOrder : Float -> Float -> Int -> Packet -> Form
-drawOrder x y i order =
+drawPackets : Float -> Float -> Int -> Packet -> Form
+drawPackets x y i order =
   let
     k = 1 + i
   in
+    square Color.brown (x - 5*k, y - 5)
+
+
+square : Color -> (Float,Float) -> Form
+square color (x,y) =
     rect 4 4
-      |> filled Color.brown
-      |> move (x - 5*k, y - 5)
+      |> filled color
+      |> move (x,y)
+
 
 backgroundColor =
   rgb 10 10 10

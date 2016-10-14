@@ -48,7 +48,7 @@ orders =
 warehouses : List Target
 warehouses =
   [ { address= Point 0000 0000, items= Array.fromList [1,2,3,4,5]}
-  , { address= Point 0100 -100, items= Array.fromList [5,4,3,2,1]}
+  , { address= Point 0100 -100, items= Array.fromList [5,0,3,0,1]}
   ]
 
 type alias Packet =
@@ -80,3 +80,8 @@ orderToPackets order =
   in
     Array.toList packs 
     |> List.filter (\p -> p.content.copies /= 0)
+
+
+waresToProducts : Target -> Int
+waresToProducts ware =
+  Array.toList ware.items |> List.sum
