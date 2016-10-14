@@ -37,7 +37,12 @@ orders =
   [ { address= Point 0200 0100, items= Array.fromList [0,2,0,0,1]}
   , { address= Point -150 0100, items= Array.fromList [0,0,0,3,0]}
   , { address= Point 0150 -150, items= Array.fromList [0,1,1,0,1]}
+  , { address= Point 0250 0050, items= Array.fromList [2,0,0,0,1]}
   , { address= Point -150 -150, items= Array.fromList [0,1,1,0,1]}
+  , { address= Point 0050 0050, items= Array.fromList [2,0,0,0,1]}
+  , { address= Point -250 0190, items= Array.fromList [2,0,0,0,1]}
+  , { address= Point -050 -050, items= Array.fromList [2,0,0,0,1]}
+  , { address= Point -250 -190, items= Array.fromList [2,0,0,0,1]}
   ]
 
 warehouses : List Target

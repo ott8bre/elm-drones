@@ -21,6 +21,7 @@ import Drone exposing (Drone)
 type State 
   = Play 
   | Pause
+  | End
 
 type alias Game =
   { state : State
@@ -30,16 +31,16 @@ type alias Game =
   , packets : List Packet
   }
 
-model : Game
-model =
+initialModel : Game
+initialModel =
   { state = Pause
   , turn = 0
   , size = Size 0 0
   , drones = List.map initDrone 
     [ Point -202 0
-    --, Point 0 153
-    --, Point -50 -100
-    --, Point 0 0 
+    , Point 0 153
+    , Point -50 -100
+    , Point 0 0 
     ] 
   , packets = List.map orderToPackets orders |> List.concat
   }
@@ -89,9 +90,10 @@ update msg model =
         newState =
           case model.state of
             Play -> Pause
-            Pause -> Play
+            _ -> Play
+        
       in 
-        { model | state = newState }
+        if model.state == End then { initialModel | size = model.size } else { model | state = newState }
 
     Tick delta -> 
       case model.state of
@@ -101,7 +103,7 @@ update msg model =
             terminated = List.isEmpty model.packets && List.all Drone.isEmpty model.drones
             newState =
               case terminated of
-                True -> Pause
+                True -> End
                 _ -> model.state
 
             newTurn =
@@ -145,16 +147,16 @@ view model =
       model.size
     scores =
       case model.state of
-        Pause ->
-          txt identity ("Turn " ++ toString model.turn)
-        _ ->
+        Play ->
           spacer 1 1
+        _ ->
+          txt identity ("Turn " ++ toString model.turn)
     info =   
       case model.state of
-        Pause ->
-          txt identity msg
-        _ ->
+        Play ->
           spacer 1 1
+        _ ->
+          txt identity "press SPACE to start/pause"
   in
     toHtml <|
     container width height middle <|
@@ -211,7 +213,7 @@ txt f string =
     |> leftAligned
 
 
-msg = "press SPACE to start/pause"
+--msg = "press SPACE to start/pause"
 
 make r c obj =
   oval r r
@@ -226,7 +228,7 @@ keyboardProcessor keyCode =
     _ -> NoOp
 
 init =
-  (model, Task.perform (\_ -> NoOp) Resize (Window.size))
+  (initialModel, Task.perform (\_ -> NoOp) Resize (Window.size))
 
 main =
   App.program
