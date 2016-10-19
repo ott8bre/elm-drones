@@ -12,11 +12,6 @@ type Msg
   | Drop Packet
   | NoOp
 
-type Status 
-  = Idle      -- 
-  | Loading   -- means fly to & load
-  | Unloading -- means fly to & unload
-
 type alias Drone =
   { schedule: List Msg
   , packets: List Packet
