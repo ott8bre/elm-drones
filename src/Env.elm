@@ -13,6 +13,11 @@ droneMaxLoad : Int
 droneMaxLoad = 
   12
 
+numberOfDrones : Int
+numberOfDrones = 
+  5
+
+
 type alias ItemId = 
   Int
 
@@ -47,6 +52,6 @@ orders =
 
 warehouses : List Target
 warehouses =
-  [ { address= Point 0000 0000, items= Array.fromList [1,2,3,4,5]}
-  , { address= Point 0100 -100, items= Array.fromList [5,0,3,0,1]}
+  [ { address= Point -100 0000, items= Array.fromList [1,2,3,4,5]}
+  , { address= Point 0100 0000, items= Array.fromList [5,0,3,0,1]}
   ]

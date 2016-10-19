@@ -15,7 +15,7 @@ import Array exposing (..)
 import Env exposing (..)
 import Point exposing (..)
 import Packet exposing (Packet)
-import Drone exposing (Drone)
+import Drone exposing (Drone, Msg(Take,Drop))
 
 -- MODEL
 
@@ -38,12 +38,7 @@ initialModel =
   { state = Pause
   , turn = 0
   , size = Size 0 0
-  , drones = List.map initDrone 
-    [ Point -202 0
-    , Point 0 153
-    , Point -50 -100
-    , Point 0 0 
-    ] 
+  , drones = List.repeat Env.numberOfDrones initDrone
   , packets = List.map orderToPackets orders |> List.concat
   , products = List.map waresToProducts warehouses
   }
@@ -51,7 +46,8 @@ initialModel =
 orderToPackets : Target -> List Packet
 orderToPackets order =
   let
-    f = \x y -> Packet.init x y Point.origin order.address
+    start = List.head warehouses |> Maybe.map .address |> Maybe.withDefault Point.origin
+    f x y = Packet.init x y start order.address
     packs = Array.indexedMap f order.items
   in
     Array.toList packs 
@@ -62,9 +58,12 @@ waresToProducts : Target -> Int
 waresToProducts ware =
   Array.toList ware.items |> List.sum
 
-initDrone : Point -> Drone
+initDrone : Drone
 initDrone = 
-  Drone.init Env.droneMaxLoad
+  List.head warehouses
+  |> Maybe.map .address
+  |> Maybe.withDefault Point.origin
+  |> Drone.init Env.droneMaxLoad
 
 --UPDATE
 
@@ -98,7 +97,8 @@ update msg model =
       case model.state of
         Play ->
           let
-            xxx = Debug.log "packets" <| List.length model.packets
+            roundPoint = \p -> (round p.x, round p.y)
+            xxx = Debug.log "drones" {- <| List.map ( .position>>roundPoint ) -} model.drones
             terminated = List.isEmpty model.packets && List.all Drone.isEmpty model.drones
             newState =
               case terminated of
@@ -128,12 +128,15 @@ updatePacketsDrones : List Packet -> List Drone -> (List Packet , List Drone)
 updatePacketsDrones packets drones =
   let 
     func drone (ps, ds) =
-      case (ps, Drone.isEmpty drone) of
-        (x::rest, True) ->
-          (rest, Drone.load x drone :: ds)
-
-        _ ->
-          (ps, Drone.update drone :: ds)
+      let
+        takeDrop packet (drone, rest) = 
+          if Drone.canLoad packet drone
+          then ( drone |> Drone.enqueue (Take packet) |> Drone.enqueue (Drop packet) , rest)
+          else ( drone , packet :: rest)
+                   
+        (newDrone, others) = List.foldr takeDrop (drone,[]) ps
+      in
+        (others, Drone.update newDrone :: ds)
   in
     List.foldr func (packets, []) drones
 
