@@ -14,6 +14,7 @@ import Array exposing (..)
 
 import Env exposing (..)
 import Point exposing (..)
+import Packet exposing (Packet)
 import Drone exposing (Drone)
 
 -- MODEL
@@ -47,23 +48,19 @@ initialModel =
   , products = List.map waresToProducts warehouses
   }
 
-{-
-load : Point -> Int -> Int -> Drone -> List( Drone -> Drone )
-load p t n d =
+orderToPackets : Target -> List Packet
+orderToPackets order =
   let
-    x = round <| distance d.position p
-    f = List.repeat x (flyTo p)
+    f = \x y -> Packet.init x y Point.origin order.address
+    packs = Array.indexedMap f order.items
   in
-    f ++ [take t n]
+    Array.toList packs 
+    |> List.filter (\p -> p.copies /= 0)
 
-deliver : Point -> Int -> Int -> Drone -> List( Drone -> Drone )
-deliver p t n d =
-  let
-    x = round <| distance d.position p
-    f = List.repeat x (flyTo p)
-  in
-    f ++ [drop t n]
--}
+
+waresToProducts : Target -> Int
+waresToProducts ware =
+  Array.toList ware.items |> List.sum
 
 initDrone : Point -> Drone
 initDrone = 
@@ -172,7 +169,7 @@ view model =
       ] 
       ++ List.map (.address >> make 5 Color.blue) warehouses
       ++ List.map (.address >> make 5 Color.red) orders
-      ++ List.map Drone.view model.drones
+      ++ List.map drawDrone model.drones
       ++ (List.indexedMap (drawProducts (-gameWidth/2) (-gameHeight/2) ) model.products |> List.concat)
       ++ List.indexedMap (drawPackets (gameWidth/2) (gameHeight/2) ) model.packets
     )
@@ -200,6 +197,13 @@ square color (x,y) =
     rect 4 4
       |> filled color
       |> move (x,y)
+
+
+drawDrone : Drone -> Form
+drawDrone {position} = 
+  oval 5 5
+    |> filled Color.white
+    |> move (position.x, position.y)
 
 
 backgroundColor =

@@ -1,20 +1,17 @@
 module Drone exposing
-    ( Drone
+    ( Drone , Msg(Take,Drop)
     , init , update
-    , load
-    , view , weight , isEmpty
+    , load , enqueue
+    , weight , isEmpty
     )
 
-import Color
-import Collage exposing (..)
-
 import Point exposing (Point)
-import Env exposing (Packet, packetWeight)
+import Packet exposing (Packet)
 
 type Msg 
-  = Wait
-  | Load Packet Point
-  | Unload Packet Point
+  = Take Packet
+  | Drop Packet
+  | NoOp
 
 type Status 
   = Idle      -- 
@@ -22,24 +19,27 @@ type Status
   | Unloading -- means fly to & unload
 
 type alias Drone =
-  { schedule: List Packet
+  { schedule: List Msg
+  , packets: List Packet
   , position: Point
   , maxLoad: Int
-  , status: Status
   }
 
 init : Int -> Point -> Drone
 init load point =
   { schedule = []
+  , packets = []
   , position = point
   , maxLoad = load
-  , status = Idle
   }
 
+enqueue : Msg -> Drone -> Drone
+enqueue msg drone = 
+  { drone | schedule = drone.schedule ++ [msg] }
 
 load : Packet -> Drone -> Drone
 load packet model =
-  { model | schedule = List.append model.schedule [packet] }
+  { model | packets = List.append model.packets [packet] }
   
 
 distance : Point -> Point -> Int
@@ -58,45 +58,45 @@ stepTo src dest =
     , y = (1-p) * src.y + p * dest.y
     }
 
+currentMsg : Drone -> Msg
+currentMsg drone =
+  drone.schedule |> List.head |> Maybe.withDefault NoOp
+
 update : Drone -> Drone
 update model =
 --  case model.status of 
 --    _ ->
       let
-        newSchedule = 
+        msg = model.schedule |> List.head |> Maybe.withDefault NoOp
+
+        newPackets = 
           if model.position == newPos then
-            List.tail model.schedule
+            List.tail model.packets
             |> Maybe.withDefault []
           else
-            model.schedule 
+            model.packets 
      
         newPos = 
-          List.head model.schedule 
-          |> Maybe.map .address
+          List.head model.packets 
+          |> Maybe.map .recipient
           |> Maybe.withDefault model.position
           |> stepTo model.position 
         
       in
         { model 
         | position = newPos
-        , schedule = newSchedule 
+        , packets = newPackets 
         }
 
 
-view : Drone -> Form
-view {position} = 
-  oval 5 5
-    |> filled Color.white
-    |> move (position.x, position.y)
-
 isEmpty : Drone -> Bool
 isEmpty model =
-  List.isEmpty model.schedule
+  List.isEmpty model.packets
 
 weight : Drone -> Int
 weight model =
-  model.schedule
-  |> List.map packetWeight
+  model.packets
+  |> List.map Packet.weight
   |> List.foldr (+) 0
 
 {-

@@ -50,38 +50,3 @@ warehouses =
   [ { address= Point 0000 0000, items= Array.fromList [1,2,3,4,5]}
   , { address= Point 0100 -100, items= Array.fromList [5,0,3,0,1]}
   ]
-
-type alias Packet =
-  { address : Point
-  , content : 
-    { item : ItemId 
-    , copies : Int 
-    }
-  }
-
-packetInit : ItemId -> Int -> Point -> Packet
-packetInit item copies point =
-  { address = point
-  , content =
-    { item = item
-    , copies = copies
-    }
-  }
-
-packetWeight : Packet -> Int
-packetWeight {content} = 
-  content.copies * weightOf content.item
-
-orderToPackets : Target -> List Packet
-orderToPackets order =
-  let
-    f = \x y -> packetInit x y order.address
-    packs = Array.indexedMap f order.items
-  in
-    Array.toList packs 
-    |> List.filter (\p -> p.content.copies /= 0)
-
-
-waresToProducts : Target -> Int
-waresToProducts ware =
-  Array.toList ware.items |> List.sum
