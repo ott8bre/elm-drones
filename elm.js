@@ -11663,7 +11663,54 @@ var _ott8bre$elm_drones$View$view = function (model) {
 										model.packets)))))))));
 };
 
-var _ott8bre$elm_drones$Main$updatePacketsDrones = F2(
+var _ott8bre$elm_drones$Update$initDrone = A2(
+	_ott8bre$elm_drones$Drone$init,
+	_ott8bre$elm_drones$Env$droneMaxLoad,
+	A2(
+		_elm_lang$core$Maybe$withDefault,
+		_ott8bre$elm_drones$Point$origin,
+		A2(
+			_elm_lang$core$Maybe$map,
+			function (_) {
+				return _.address;
+			},
+			_elm_lang$core$List$head(_ott8bre$elm_drones$Env$warehouses))));
+var _ott8bre$elm_drones$Update$waresToProducts = function (ware) {
+	return _elm_lang$core$List$sum(
+		_elm_lang$core$Array$toList(ware.items));
+};
+var _ott8bre$elm_drones$Update$orderToPackets = function (order) {
+	var start = A2(
+		_elm_lang$core$Maybe$withDefault,
+		_ott8bre$elm_drones$Point$origin,
+		A2(
+			_elm_lang$core$Maybe$map,
+			function (_) {
+				return _.address;
+			},
+			_elm_lang$core$List$head(_ott8bre$elm_drones$Env$warehouses)));
+	var f = F2(
+		function (x, y) {
+			return A4(_ott8bre$elm_drones$Packet$init, x, y, start, order.address);
+		});
+	var packs = A2(_elm_lang$core$Array$indexedMap, f, order.items);
+	return A2(
+		_elm_lang$core$List$filter,
+		function (p) {
+			return !_elm_lang$core$Native_Utils.eq(p.copies, 0);
+		},
+		_elm_lang$core$Array$toList(packs));
+};
+var _ott8bre$elm_drones$Update$initialModel = {
+	state: _ott8bre$elm_drones$Model$Pause,
+	turn: 0,
+	size: A2(_elm_lang$window$Window$Size, 0, 0),
+	drones: A2(_elm_lang$core$List$repeat, _ott8bre$elm_drones$Env$numberOfDrones, _ott8bre$elm_drones$Update$initDrone),
+	packets: _elm_lang$core$List$concat(
+		A2(_elm_lang$core$List$map, _ott8bre$elm_drones$Update$orderToPackets, _ott8bre$elm_drones$Env$orders)),
+	products: A2(_elm_lang$core$List$map, _ott8bre$elm_drones$Update$waresToProducts, _ott8bre$elm_drones$Env$warehouses)
+};
+var _ott8bre$elm_drones$Update$updatePacketsDrones = F2(
 	function (packets, drones) {
 		var func = F2(
 			function (drone, _p0) {
@@ -11721,54 +11768,7 @@ var _ott8bre$elm_drones$Main$updatePacketsDrones = F2(
 			},
 			drones);
 	});
-var _ott8bre$elm_drones$Main$initDrone = A2(
-	_ott8bre$elm_drones$Drone$init,
-	_ott8bre$elm_drones$Env$droneMaxLoad,
-	A2(
-		_elm_lang$core$Maybe$withDefault,
-		_ott8bre$elm_drones$Point$origin,
-		A2(
-			_elm_lang$core$Maybe$map,
-			function (_) {
-				return _.address;
-			},
-			_elm_lang$core$List$head(_ott8bre$elm_drones$Env$warehouses))));
-var _ott8bre$elm_drones$Main$waresToProducts = function (ware) {
-	return _elm_lang$core$List$sum(
-		_elm_lang$core$Array$toList(ware.items));
-};
-var _ott8bre$elm_drones$Main$orderToPackets = function (order) {
-	var start = A2(
-		_elm_lang$core$Maybe$withDefault,
-		_ott8bre$elm_drones$Point$origin,
-		A2(
-			_elm_lang$core$Maybe$map,
-			function (_) {
-				return _.address;
-			},
-			_elm_lang$core$List$head(_ott8bre$elm_drones$Env$warehouses)));
-	var f = F2(
-		function (x, y) {
-			return A4(_ott8bre$elm_drones$Packet$init, x, y, start, order.address);
-		});
-	var packs = A2(_elm_lang$core$Array$indexedMap, f, order.items);
-	return A2(
-		_elm_lang$core$List$filter,
-		function (p) {
-			return !_elm_lang$core$Native_Utils.eq(p.copies, 0);
-		},
-		_elm_lang$core$Array$toList(packs));
-};
-var _ott8bre$elm_drones$Main$initialModel = {
-	state: _ott8bre$elm_drones$Model$Pause,
-	turn: 0,
-	size: A2(_elm_lang$window$Window$Size, 0, 0),
-	drones: A2(_elm_lang$core$List$repeat, _ott8bre$elm_drones$Env$numberOfDrones, _ott8bre$elm_drones$Main$initDrone),
-	packets: _elm_lang$core$List$concat(
-		A2(_elm_lang$core$List$map, _ott8bre$elm_drones$Main$orderToPackets, _ott8bre$elm_drones$Env$orders)),
-	products: A2(_elm_lang$core$List$map, _ott8bre$elm_drones$Main$waresToProducts, _ott8bre$elm_drones$Env$warehouses)
-};
-var _ott8bre$elm_drones$Main$update = F2(
+var _ott8bre$elm_drones$Update$update = F2(
 	function (msg, model) {
 		var _p7 = msg;
 		switch (_p7.ctor) {
@@ -11788,14 +11788,14 @@ var _ott8bre$elm_drones$Main$update = F2(
 					}
 				}();
 				return _elm_lang$core$Native_Utils.eq(model.state, _ott8bre$elm_drones$Model$End) ? _elm_lang$core$Native_Utils.update(
-					_ott8bre$elm_drones$Main$initialModel,
+					_ott8bre$elm_drones$Update$initialModel,
 					{size: model.size}) : _elm_lang$core$Native_Utils.update(
 					model,
 					{state: newState});
 			default:
 				var _p9 = model.state;
 				if (_p9.ctor === 'Play') {
-					var _p10 = A2(_ott8bre$elm_drones$Main$updatePacketsDrones, model.packets, model.drones);
+					var _p10 = A2(_ott8bre$elm_drones$Update$updatePacketsDrones, model.packets, model.drones);
 					var newPackets = _p10._0;
 					var newDrones = _p10._1;
 					var newTurn = 1 + model.turn;
@@ -11824,56 +11824,57 @@ var _ott8bre$elm_drones$Main$update = F2(
 				}
 		}
 	});
-var _ott8bre$elm_drones$Main$NoOp = {ctor: 'NoOp'};
-var _ott8bre$elm_drones$Main$TogglePlay = {ctor: 'TogglePlay'};
-var _ott8bre$elm_drones$Main$keyboardProcessor = function (keyCode) {
-	var _p12 = keyCode;
-	if (_p12 === 32) {
-		return _ott8bre$elm_drones$Main$TogglePlay;
-	} else {
-		return _ott8bre$elm_drones$Main$NoOp;
-	}
-};
-var _ott8bre$elm_drones$Main$Tick = function (a) {
+var _ott8bre$elm_drones$Update$NoOp = {ctor: 'NoOp'};
+var _ott8bre$elm_drones$Update$TogglePlay = {ctor: 'TogglePlay'};
+var _ott8bre$elm_drones$Update$Tick = function (a) {
 	return {ctor: 'Tick', _0: a};
 };
-var _ott8bre$elm_drones$Main$Resize = function (a) {
+var _ott8bre$elm_drones$Update$Resize = function (a) {
 	return {ctor: 'Resize', _0: a};
 };
-var _ott8bre$elm_drones$Main$init = {
+var _ott8bre$elm_drones$Update$init = {
 	ctor: '_Tuple2',
-	_0: _ott8bre$elm_drones$Main$initialModel,
+	_0: _ott8bre$elm_drones$Update$initialModel,
 	_1: A3(
 		_elm_lang$core$Task$perform,
-		function (_p13) {
-			return _ott8bre$elm_drones$Main$NoOp;
+		function (_p12) {
+			return _ott8bre$elm_drones$Update$NoOp;
 		},
-		_ott8bre$elm_drones$Main$Resize,
+		_ott8bre$elm_drones$Update$Resize,
 		_elm_lang$window$Window$size)
+};
+
+var _ott8bre$elm_drones$Main$keyboardProcessor = function (keyCode) {
+	var _p0 = keyCode;
+	if (_p0 === 32) {
+		return _ott8bre$elm_drones$Update$TogglePlay;
+	} else {
+		return _ott8bre$elm_drones$Update$NoOp;
+	}
 };
 var _ott8bre$elm_drones$Main$main = {
 	main: _elm_lang$html$Html_App$program(
 		{
-			init: _ott8bre$elm_drones$Main$init,
+			init: _ott8bre$elm_drones$Update$init,
 			update: F2(
 				function (msg, m) {
 					return A2(
 						_elm_lang$core$Platform_Cmd_ops['!'],
-						A2(_ott8bre$elm_drones$Main$update, msg, m),
+						A2(_ott8bre$elm_drones$Update$update, msg, m),
 						_elm_lang$core$Native_List.fromArray(
 							[]));
 				}),
 			view: _ott8bre$elm_drones$View$view,
-			subscriptions: function (_p14) {
+			subscriptions: function (_p1) {
 				return _elm_lang$core$Platform_Sub$batch(
 					_elm_lang$core$Native_List.fromArray(
 						[
-							_elm_lang$window$Window$resizes(_ott8bre$elm_drones$Main$Resize),
+							_elm_lang$window$Window$resizes(_ott8bre$elm_drones$Update$Resize),
 							_elm_lang$keyboard$Keyboard$ups(_ott8bre$elm_drones$Main$keyboardProcessor),
 							_elm_lang$animation_frame$AnimationFrame$diffs(
-							function (_p15) {
-								return _ott8bre$elm_drones$Main$Tick(
-									_elm_lang$core$Time$inSeconds(_p15));
+							function (_p2) {
+								return _ott8bre$elm_drones$Update$Tick(
+									_elm_lang$core$Time$inSeconds(_p2));
 							})
 						]));
 			}
