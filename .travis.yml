@@ -5,4 +5,4 @@ node_js:
 install:
   - npm install -g elm@0.17
 script:
-  - bash tests/run-tests.sh
+  - bash test/run-tests.sh
