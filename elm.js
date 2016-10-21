@@ -11490,9 +11490,6 @@ var _ott8bre$elm_drones$Drone$Drop = function (a) {
 var _ott8bre$elm_drones$Drone$Take = function (a) {
 	return {ctor: 'Take', _0: a};
 };
-var _ott8bre$elm_drones$Drone$Unloading = {ctor: 'Unloading'};
-var _ott8bre$elm_drones$Drone$Loading = {ctor: 'Loading'};
-var _ott8bre$elm_drones$Drone$Idle = {ctor: 'Idle'};
 
 var _ott8bre$elm_drones$Main$make = F3(
 	function (r, c, obj) {

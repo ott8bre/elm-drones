@@ -249,7 +249,8 @@ keyboardProcessor keyCode =
 
 init =
   (initialModel, Task.perform (\_ -> NoOp) Resize (Window.size))
-
+ 
+main : Program Never
 main =
   App.program
     { init = init
