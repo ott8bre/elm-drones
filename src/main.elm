@@ -4,7 +4,7 @@ import Keyboard
 import Time exposing (..)
 import Window exposing (Size)
 import AnimationFrame
-import Html.App as App
+import Html
 import View exposing (view)
 import Update exposing (Msg(..), update, init)
 
@@ -19,9 +19,9 @@ keyboardProcessor keyCode =
             NoOp
 
 
-main : Program Never
+--main : Program Never
 main =
-    App.program
+    Html.program
         { init = init
         , update = \msg m -> update msg m ! []
         , view = view

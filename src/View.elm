@@ -55,23 +55,23 @@ view model =
 drawProducts : Float -> Float -> Int -> Int -> List Form
 drawProducts x y i size =
     let
+        k =
+            toFloat ( 1 + i )
+
         f =
             \h -> square Color.green ( x + 5 * h, y + 5 * k )
 
         range =
             List.range 1 size
-
-        k =
-            1 + i
     in
-        List.map f range
+        List.map (f << toFloat) range
 
 
 drawPackets : Float -> Float -> Int -> Packet -> Form
 drawPackets x y i order =
     let
         k =
-            1 + i
+            toFloat ( 1 + i )
     in
         square Color.brown ( x - 5 * k, y - 5 )
 

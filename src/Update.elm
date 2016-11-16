@@ -20,7 +20,7 @@ type Msg
 
 init : ( Game, Cmd Msg )
 init =
-    ( initialModel, Task.perform (\_ -> NoOp) Resize (Window.size) )
+    ( initialModel, Task.perform Resize (Window.size) )
 
 
 update : Msg -> Game -> Game
