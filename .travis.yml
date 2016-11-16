@@ -4,5 +4,6 @@ node_js:
   - "4.3"
 install:
   - npm install -g elm@0.18
+  - npm install -g elm-test
 script:
-  - bash test/run-tests.sh
+  - bash run-tests.sh
