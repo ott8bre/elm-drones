@@ -1,4 +1,4 @@
-module Tests.Packet exposing (tests)
+module PacketTests exposing (suite)
 
 import Env
 import Packet exposing (Packet)
@@ -14,8 +14,8 @@ sample =
   Packet.init 1 1 Point.origin Point.origin
 
 
-tests : Test
-tests =
+suite : Test
+suite =
   let basicsTests = describe "Basics"
         [ test "init .item" <| \() -> Expect.equal 1 (.item sample)
         , test "init .copies" <| \() -> Expect.equal 1 (.copies sample)

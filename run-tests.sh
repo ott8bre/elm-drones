@@ -3,9 +3,9 @@
 cd "$(dirname "$0")"
 set -e
 
-elm-package install -y
-
 elm-test
+
+elm make src/Main.elm --optimize --output=elm.js
 
 #VERSION_DIR="$(ls elm-stuff/packages/elm-lang/core/)"
 #CORE_PACKAGE_DIR="elm-stuff/packages/elm-lang/core/$VERSION_DIR"

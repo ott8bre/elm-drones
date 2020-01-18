@@ -4,8 +4,12 @@ import Array exposing (..)
 import Point exposing (..)
 
 
-( gameWidth, gameHeight ) =
-    ( 600, 400 )
+gameWidth =
+    600
+
+
+gameHeight =
+    400
 
 
 

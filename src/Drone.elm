@@ -1,7 +1,6 @@
-module Drone
-    exposing
+module Drone exposing
         ( Drone
-        , Msg(Take, Drop)
+        , Msg(..)
         , init
         , update
         , enqueue
