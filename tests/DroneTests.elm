@@ -1,15 +1,13 @@
 module DroneTests exposing (suite)
 
--- exposing (Point)
+--import List exposing ((::))
+--import Maybe exposing (..)
 
-import Basics exposing (..)
-import Drone exposing (..)
-import Expect exposing (..)
-import List exposing ((::))
-import Maybe exposing (..)
+import Drone exposing (Drone, Msg(..), init)
+import Expect exposing (equal)
 import Packet exposing (Packet)
 import Point
-import Test exposing (..)
+import Test exposing (Test, describe, test)
 
 
 sample : Drone

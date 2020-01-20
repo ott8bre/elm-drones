@@ -1,9 +1,8 @@
-module Packet
-    exposing
-        ( Packet
-        , init
-        , weight
-        )
+module Packet exposing
+    ( Packet
+    , init
+    , weight
+    )
 
 import Env exposing (ItemId)
 import Point exposing (Point)

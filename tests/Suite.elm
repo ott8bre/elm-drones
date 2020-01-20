@@ -1,12 +1,10 @@
-module Suite exposing (..)
+module Suite exposing (suite)
 
---import Expect exposing (Expectation)
---import Fuzz exposing (Fuzzer, int, list, string)
-import Test exposing (..)
+import DroneTests exposing (suite)
+import PacketTests exposing (suite)
+import PointTests exposing (suite)
+import Test exposing (Test, describe)
 
-import PointTests exposing (..)
-import DroneTests exposing (..)
-import PacketTests exposing (..)
 
 suite : Test
 suite =

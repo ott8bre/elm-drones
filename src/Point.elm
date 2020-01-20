@@ -1,9 +1,8 @@
-module Point
-    exposing
-        ( Point
-        , origin
-        , distance
-        )
+module Point exposing
+    ( Point
+    , distance
+    , origin
+    )
 
 
 type alias Point =
@@ -23,4 +22,4 @@ distance p q =
         square a =
             a * a
     in
-        square (p.x - q.x) + square (p.y - q.y) |> sqrt
+    square (p.x - q.x) + square (p.y - q.y) |> sqrt
