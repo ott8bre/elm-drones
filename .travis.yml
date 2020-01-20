@@ -1,4 +1,3 @@
-#sudo: false # force container-based infrastructure
 language: elm
-#script:
-#  - bash run-tests.sh
+elm:
+  - elm0.19.1
