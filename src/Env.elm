@@ -4,26 +4,14 @@ import Array exposing (..)
 import Point exposing (..)
 
 
-gameWidth =
-    600
-
-
-gameHeight =
-    400
-
-
-
---(gameWidth,gameHeight) = (900,600)
-
-
 droneMaxLoad : Int
 droneMaxLoad =
-    12
+    10
 
 
 numberOfDrones : Int
 numberOfDrones =
-    5
+    8
 
 
 type alias ItemId =
@@ -42,27 +30,27 @@ weightOf index =
 
 
 type alias Target =
-    { address : Point
+    { position : Point
     , items : Array ItemId
     }
 
 
 orders : List Target
 orders =
-    [ { address = Point 200 100, items = Array.fromList [ 0, 2, 0, 0, 1 ] }
-    , { address = Point -150 100, items = Array.fromList [ 0, 0, 0, 3, 0 ] }
-    , { address = Point 150 -150, items = Array.fromList [ 0, 1, 1, 0, 1 ] }
-    , { address = Point 250 50, items = Array.fromList [ 2, 0, 0, 0, 1 ] }
-    , { address = Point -150 -150, items = Array.fromList [ 0, 1, 1, 0, 1 ] }
-    , { address = Point 50 50, items = Array.fromList [ 2, 0, 0, 0, 1 ] }
-    , { address = Point -250 190, items = Array.fromList [ 2, 0, 0, 0, 1 ] }
-    , { address = Point -50 -50, items = Array.fromList [ 2, 0, 0, 0, 1 ] }
-    , { address = Point -250 -190, items = Array.fromList [ 2, 0, 0, 0, 1 ] }
+    [ { position = Point 200 100, items = Array.fromList [ 0, 2, 0, 0, 1 ] }
+    , { position = Point -150 100, items = Array.fromList [ 0, 0, 0, 3, 0 ] }
+    , { position = Point 150 -150, items = Array.fromList [ 0, 1, 1, 0, 1 ] }
+    , { position = Point 250 50, items = Array.fromList [ 2, 0, 0, 0, 1 ] }
+    , { position = Point -150 -150, items = Array.fromList [ 0, 1, 1, 0, 1 ] }
+    , { position = Point 50 50, items = Array.fromList [ 2, 0, 0, 0, 1 ] }
+    , { position = Point -250 190, items = Array.fromList [ 2, 0, 0, 0, 1 ] }
+    , { position = Point -50 -50, items = Array.fromList [ 2, 0, 0, 0, 1 ] }
+    , { position = Point -250 -190, items = Array.fromList [ 2, 0, 0, 0, 1 ] }
     ]
 
 
 warehouses : List Target
 warehouses =
-    [ { address = Point -100 0, items = Array.fromList [ 1, 2, 3, 4, 5 ] }
-    , { address = Point 100 0, items = Array.fromList [ 5, 0, 3, 0, 1 ] }
+    [ { position = Point -100 0, items = Array.fromList [ 1, 2, 3, 4, 5 ] }
+    , { position = Point 100 0, items = Array.fromList [ 5, 0, 3, 0, 1 ] }
     ]

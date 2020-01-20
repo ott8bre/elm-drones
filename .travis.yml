@@ -1,9 +1,4 @@
-sudo: false # force container-based infrastructure
-language: node_js
-node_js:
-  - "4.3"
-install:
-  - npm install -g elm@0.19.1
-  - npm install -g elm-test
-script:
-  - bash run-tests.sh
+#sudo: false # force container-based infrastructure
+language: elm
+#script:
+#  - bash run-tests.sh

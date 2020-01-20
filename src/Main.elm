@@ -1,4 +1,4 @@
-module Main exposing (..)
+module Main exposing (main)
 
 import Array exposing (..)
 import Drone exposing (..)
@@ -38,7 +38,7 @@ initialModel =
 
 startPoint : Point
 startPoint =
-    List.head warehouses |> Maybe.map .address |> Maybe.withDefault Point.origin
+    List.head warehouses |> Maybe.map .position |> Maybe.withDefault Point.origin
 
 
 initDrone : Drone
@@ -50,7 +50,7 @@ orderToPackets : Target -> List Packet
 orderToPackets order =
     let
         f x y =
-            Packet.init x y startPoint order.address
+            Packet.init x y startPoint order.position
 
         packs =
             Array.indexedMap f order.items
@@ -137,36 +137,53 @@ updatePacketsDrones packets drones =
 view : Computer -> Model -> List Shape
 view env model =
     let
-        info =
-            case model.status of
-                Play ->
-                    ""
+        background =
+            rectangle black env.screen.width env.screen.height
 
-                _ ->
-                    "press SPACE to start/pause"
+        productsLayer =
+            group <| (List.indexedMap (drawProducts (-env.screen.width / 2) (-env.screen.height / 2)) model.products |> List.concat)
 
-        score =
-            case model.status of
-                Play ->
-                    ""
+        packetsLayer =
+            group <| List.indexedMap (drawPackets (env.screen.width / 2) (env.screen.height / 2)) model.packets
 
-                _ ->
-                    "Turn " ++ String.fromInt model.turn
+        infoLayer =
+            group <|
+                case model.status of
+                    Play ->
+                        []
+
+                    _ ->
+                        [ "Press SPACE to start/pause"
+                            |> words green
+                            |> move 0 (-env.screen.height / 2 + 40)
+                        , "Turn "
+                            ++ String.fromInt model.turn
+                            |> words green
+                            |> move 0 (env.screen.height / 2 - 40)
+                        ]
+
+        warehousesLayer =
+            group <| List.map (.position >> make 9 blue) warehouses
+
+        dronesLayer =
+            group <| List.map (.position >> make 5 white) model.drones
+
+        ordersLayer =
+            group <| List.map (.position >> make 7 red) orders
     in
-    [ rectangle black env.screen.width env.screen.height
-    , words green info |> move 0 (40 - env.screen.height / 2)
-    , words green score |> move 0 (env.screen.height / 2 - 40)
+    [ background
+    , productsLayer
+    , packetsLayer
+    , infoLayer
+    , warehousesLayer
+    , ordersLayer
+    , dronesLayer
     ]
-        ++ List.map (.address >> make 5 blue) warehouses
-        ++ List.map (.address >> make 5 red) orders
-        ++ List.map (.position >> make 5 white) model.drones
-        ++ (List.indexedMap (drawProducts (-env.screen.width / 2) (-env.screen.height / 2)) model.products |> List.concat)
-        ++ List.indexedMap (drawPackets (env.screen.width / 2) (env.screen.height / 2)) model.packets
 
 
 make : Number -> Color -> Point -> Shape
 make radius color point =
-    oval color radius radius
+    circle color radius
         |> move point.x point.y
 
 
