@@ -163,13 +163,13 @@ view env model =
                         ]
 
         warehousesLayer =
-            group <| List.map (.position >> make 9 blue) warehouses
+            group <| List.map (.position >> drawCircle 9 blue) warehouses
 
         dronesLayer =
-            group <| List.map (.position >> make 5 white) model.drones
+            group <| List.map (.position >> drawCircle 5 white) model.drones
 
         ordersLayer =
-            group <| List.map (.position >> make 7 red) orders
+            group <| List.map (.position >> drawCircle 7 red) orders
     in
     [ background
     , productsLayer
@@ -181,9 +181,15 @@ view env model =
     ]
 
 
-make : Number -> Color -> Point -> Shape
-make radius color point =
+drawCircle : Number -> Color -> Point -> Shape
+drawCircle radius color point =
     circle color radius
+        |> move point.x point.y
+
+
+drawSquare : Number -> Color -> Point -> Shape
+drawSquare side color point =
+    rectangle color side side
         |> move point.x point.y
 
 
@@ -194,7 +200,7 @@ drawProducts x y i size =
             toFloat (1 + i)
 
         f =
-            \h -> rectangle green 4 4 |> move (x + 5 * h) (y + 5 * k)
+            \h -> drawSquare 4 green <| Point (x + 5 * h) (y + 5 * k)
 
         range =
             List.range 1 size
@@ -205,7 +211,7 @@ drawProducts x y i size =
 drawPackets : Float -> Float -> Int -> Packet -> Shape
 drawPackets x y i order =
     let
-        k =
-            toFloat (1 + i)
+        position =
+            Point (x - 5 * toFloat (1 + i)) (y - 5)
     in
-    rectangle brown 4 4 |> move (x - 5 * k) (y - 5)
+    drawSquare 4 brown position

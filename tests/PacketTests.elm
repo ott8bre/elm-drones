@@ -21,7 +21,7 @@ suite =
                 , test "init .copies" <| \() -> Expect.equal 1 (.copies sample)
                 , test "init .sender" <| \() -> Expect.equal Point.origin (.sender sample)
                 , test "init .recipient" <| \() -> Expect.equal Point.origin (.recipient sample)
-                , test "init weight" <| \() -> Expect.equal (Env.weightOf 1) (Packet.weight sample)
+                , test "init weightOf" <| \() -> Expect.equal (Env.weightOf 1) (Packet.weightOf sample)
                 ]
     in
     describe "Packet"

@@ -6,7 +6,7 @@ module Drone exposing
     , init
     , isEmpty
     , update
-    , weight
+    , weightOf
     )
 
 import Packet exposing (Packet)
@@ -49,16 +49,11 @@ enqueue msg drone =
             drone
 
 
-distance : Point -> Point -> Int
-distance p q =
-    Point.distance p q |> floor
-
-
 stepTo : Point -> Point -> Point
 stepTo src dest =
     let
         d =
-            distance src dest
+            Point.distance src dest |> floor
 
         p =
             if d == 0 then
@@ -109,7 +104,7 @@ canLoad packet drone =
         f msg =
             case msg of
                 Take p ->
-                    Packet.weight p
+                    Packet.weightOf p
 
                 _ ->
                     0
@@ -119,11 +114,11 @@ canLoad packet drone =
                 |> List.map f
                 |> List.sum
     in
-    takingWeight + weight drone + Packet.weight packet <= drone.maxLoad
+    takingWeight + weightOf drone + Packet.weightOf packet <= drone.maxLoad
 
 
-weight : Drone -> Int
-weight model =
+weightOf : Drone -> Int
+weightOf model =
     model.packets
-        |> List.map Packet.weight
+        |> List.map Packet.weightOf
         |> List.foldr (+) 0

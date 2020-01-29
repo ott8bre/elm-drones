@@ -1,7 +1,7 @@
 module Packet exposing
     ( Packet
     , init
-    , weight
+    , weightOf
     )
 
 import Env exposing (ItemId)
@@ -25,6 +25,6 @@ init item copies from to =
     }
 
 
-weight : Packet -> Int
-weight { item, copies } =
+weightOf : Packet -> Int
+weightOf { item, copies } =
     copies * Env.weightOf item

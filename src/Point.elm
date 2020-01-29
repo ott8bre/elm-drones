@@ -19,7 +19,10 @@ origin =
 distance : Point -> Point -> Float
 distance p q =
     let
-        square a =
-            a * a
+        dx =
+            p.x - q.x
+
+        dy =
+            p.y - q.y
     in
-    square (p.x - q.x) + square (p.y - q.y) |> sqrt
+    sqrt <| dx * dx + dy * dy

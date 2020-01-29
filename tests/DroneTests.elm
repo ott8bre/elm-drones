@@ -33,7 +33,7 @@ suite =
                 [ test "init .schedule" <| \() -> Expect.equal [] (.schedule sample)
                 , test "init .packets" <| \() -> Expect.equal [] (.packets sample)
                 , test "init .position" <| \() -> Expect.equal Point.origin (.position sample)
-                , test "init weight" <| \() -> Expect.equal 0 (Drone.weight sample)
+                , test "init weightOf" <| \() -> Expect.equal 0 (Drone.weightOf sample)
                 ]
 
         takeTests =

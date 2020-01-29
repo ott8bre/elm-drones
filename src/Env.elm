@@ -1,7 +1,7 @@
 module Env exposing (..)
 
-import Array exposing (..)
-import Point exposing (..)
+import Array exposing (Array)
+import Point exposing (Point)
 
 
 droneMaxLoad : Int
@@ -14,16 +14,12 @@ numberOfDrones =
     8
 
 
-type alias ItemId =
-    Int
-
-
 weights : Array Int
 weights =
     Array.fromList [ 3, 1, 7, 2, 5 ]
 
 
-weightOf : ItemId -> Int
+weightOf : Int -> Int
 weightOf index =
     Array.get index weights
         |> Maybe.withDefault 0
@@ -31,26 +27,33 @@ weightOf index =
 
 type alias Target =
     { position : Point
-    , items : Array ItemId
+    , items : Array Int
+    }
+
+
+makeTarget : Float -> Float -> List Int -> Target
+makeTarget x y quantities =
+    { position = Point x y
+    , items = Array.fromList quantities
     }
 
 
 orders : List Target
 orders =
-    [ { position = Point 200 100, items = Array.fromList [ 0, 2, 0, 0, 1 ] }
-    , { position = Point -150 100, items = Array.fromList [ 0, 0, 0, 3, 0 ] }
-    , { position = Point 150 -150, items = Array.fromList [ 0, 1, 1, 0, 1 ] }
-    , { position = Point 250 50, items = Array.fromList [ 2, 0, 0, 0, 1 ] }
-    , { position = Point -150 -150, items = Array.fromList [ 0, 1, 1, 0, 1 ] }
-    , { position = Point 50 50, items = Array.fromList [ 2, 0, 0, 0, 1 ] }
-    , { position = Point -250 190, items = Array.fromList [ 2, 0, 0, 0, 1 ] }
-    , { position = Point -50 -50, items = Array.fromList [ 2, 0, 0, 0, 1 ] }
-    , { position = Point -250 -190, items = Array.fromList [ 2, 0, 0, 0, 1 ] }
+    [ makeTarget 200 100 [ 0, 2, 0, 0, 1 ]
+    , makeTarget -150 100 [ 0, 0, 0, 3, 0 ]
+    , makeTarget 150 -150 [ 0, 1, 1, 0, 1 ]
+    , makeTarget 250 50 [ 2, 0, 0, 0, 1 ]
+    , makeTarget -150 -150 [ 0, 1, 1, 0, 1 ]
+    , makeTarget 50 50 [ 2, 0, 0, 0, 1 ]
+    , makeTarget -250 190 [ 2, 0, 0, 0, 1 ]
+    , makeTarget -50 -50 [ 2, 0, 0, 0, 1 ]
+    , makeTarget -250 -190 [ 2, 0, 0, 0, 1 ]
     ]
 
 
 warehouses : List Target
 warehouses =
-    [ { position = Point -100 0, items = Array.fromList [ 1, 2, 3, 4, 5 ] }
-    , { position = Point 100 0, items = Array.fromList [ 5, 0, 3, 0, 1 ] }
+    [ makeTarget -100 0 [ 1, 2, 3, 4, 5 ]
+    , makeTarget 100 0 [ 5, 0, 3, 0, 1 ]
     ]
