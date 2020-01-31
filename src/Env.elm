@@ -14,12 +14,16 @@ numberOfDrones =
     8
 
 
+type alias ItemId =
+    Int
+
+
 weights : Array Int
 weights =
     Array.fromList [ 3, 1, 7, 2, 5 ]
 
 
-weightOf : Int -> Int
+weightOf : ItemId -> Int
 weightOf index =
     Array.get index weights
         |> Maybe.withDefault 0
