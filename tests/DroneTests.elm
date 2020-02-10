@@ -30,15 +30,31 @@ suite =
     let
         basicsTests =
             describe "Basics"
-                [ test "init .schedule" <| \() -> Expect.equal [] (.schedule sample)
-                , test "init .packets" <| \() -> Expect.equal [] (.packets sample)
-                , test "init .position" <| \() -> Expect.equal Point.origin (.position sample)
-                , test "init weightOf" <| \() -> Expect.equal 0 (Drone.weightOf sample)
+                [ test "init .schedule" <|
+                    \() ->
+                        .schedule sample |> Expect.equal []
+
+                --
+                , test "init .packets" <|
+                    \() ->
+                        .packets sample |> Expect.equal []
+
+                --
+                , test "init .position" <|
+                    \() ->
+                        .position sample |> Expect.equal Point.origin
+
+                --
+                , test "init weightOf" <|
+                    \() ->
+                        Drone.weightOf sample |> Expect.equal 0
                 ]
 
         takeTests =
             describe "Take"
-                [ test "one .schedule" <| \() -> Expect.equal 1 (sampleTake |> .schedule |> List.length)
+                [ test "one .schedule" <|
+                    \() ->
+                        sampleTake |> .schedule |> List.length |> Expect.equal 1
                 ]
     in
     describe "Drone"

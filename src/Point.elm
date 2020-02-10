@@ -3,6 +3,9 @@ module Point exposing
     , add
     , distance
     , dot
+    , mapX
+    , mapY
+    , negate
     , origin
     , stepTo
     , sub
@@ -18,6 +21,11 @@ type alias Point =
 origin : Point
 origin =
     Point 0 0
+
+
+negate : Point -> Point
+negate { x, y } =
+    { x = -x, y = -y }
 
 
 distance : Point -> Point -> Float
@@ -48,6 +56,16 @@ dot n p =
     { x = n * p.x
     , y = n * p.y
     }
+
+
+mapX : (Float -> Float) -> Point -> Point
+mapX f { x, y } =
+    { x = f x, y = y }
+
+
+mapY : (Float -> Float) -> Point -> Point
+mapY f { x, y } =
+    { x = f x, y = y }
 
 
 stepTo : Point -> Point -> Point
