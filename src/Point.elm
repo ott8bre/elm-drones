@@ -1,14 +1,14 @@
 module Point exposing
     ( Point
-    , add
-    , distance
+    , distanceFrom
     , dot
+    , map
     , mapX
     , mapY
-    , negate
+    , minus
     , origin
+    , plus
     , stepTo
-    , sub
     )
 
 
@@ -23,29 +23,24 @@ origin =
     Point 0 0
 
 
-negate : Point -> Point
-negate { x, y } =
-    { x = -x, y = -y }
-
-
-distance : Point -> Point -> Float
-distance p q =
+distanceFrom : Point -> Point -> Float
+distanceFrom p q =
     let
         { x, y } =
-            sub p q
+            minus p q
     in
     sqrt <| x * x + y * y
 
 
-add : Point -> Point -> Point
-add p q =
+plus : Point -> Point -> Point
+plus p q =
     { x = p.x + q.x
     , y = p.y + q.y
     }
 
 
-sub : Point -> Point -> Point
-sub p q =
+minus : Point -> Point -> Point
+minus p q =
     { x = p.x - q.x
     , y = p.y - q.y
     }
@@ -56,6 +51,11 @@ dot n p =
     { x = n * p.x
     , y = n * p.y
     }
+
+
+map : (Float -> Float) -> Point -> Point
+map f { x, y } =
+    { x = f x, y = f y }
 
 
 mapX : (Float -> Float) -> Point -> Point
@@ -72,7 +72,7 @@ stepTo : Point -> Point -> Point
 stepTo src dest =
     let
         d =
-            distance src dest
+            distanceFrom src dest
     in
     if d < 0.5 then
         dest
@@ -82,4 +82,4 @@ stepTo src dest =
             p =
                 1 / d
         in
-        add (dot (1 - p) src) (dot p dest)
+        plus (dot (1 - p) src) (dot p dest)

@@ -1,4 +1,4 @@
-module DroneTests exposing (suite)
+module Tests.Drone exposing (suite)
 
 --import List exposing ((::))
 --import Maybe exposing (..)

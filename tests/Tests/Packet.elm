@@ -1,4 +1,4 @@
-module PacketTests exposing (suite)
+module Tests.Packet exposing (suite)
 
 import Env
 import Expect exposing (equal)
