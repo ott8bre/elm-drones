@@ -1,30 +1,19 @@
 module Tests.Point exposing (suite)
 
---import Fuzz exposing (Fuzzer, float)
-
 import Expect exposing (FloatingPointTolerance(..))
+import Fuzz exposing (float)
 import Point exposing (..)
 import Test exposing (Test)
 import Util.Expect as Expect
 import Util.Fuzz as Fuzz
 
 
-
-{-
-   xxx : () -> Expectation
-   xxx f =
-       f identity >> Expect.equal
--}
-
-
 suite : Test
 suite =
-    Test.describe "All"
+    Test.describe "-"
         --
         [ Test.fuzz Fuzz.point "Map identity on point has no effect" <|
-            \point ->
-                map identity point
-                    |> Expect.equal point
+            (map identity |> Expect.like identity)
 
         --
         , Test.fuzz2 Fuzz.point Fuzz.point "Distance is not negative" <|
@@ -42,12 +31,13 @@ suite =
 
         --
         , Test.fuzz2 Fuzz.point Fuzz.point "Distance is commutative" <|
-            \pointA pointB ->
-                Expect.exactly
-                    (distanceFrom pointA pointB)
-                    (distanceFrom pointB pointA)
+            (distanceFrom |> Expect.commutative)
 
-        --, Test.test "-" <| \_ -> Point 0.00000001 0.0 |> distanceFrom origin |> Expect.atLeast 1
+        --
+        , Test.fuzz Fuzz.float "Dot has no effect on origin" <|
+            \number ->
+                dot number origin
+                    |> Expect.equal origin
         ]
 
 
